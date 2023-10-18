@@ -3,8 +3,11 @@ package com.samadihadis.weatherapplication
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.ActionMenuView
 import android.widget.CheckBox
+import android.widget.Toast
 import androidx.appcompat.widget.AppCompatCheckBox
+import com.samadihadis.weatherapplication.databinding.ActivityMainBinding
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
@@ -14,47 +17,42 @@ import org.json.JSONObject
 import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
-
-    private var checkBox: AppCompatCheckBox? = null
+    lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        val binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-
-        checkBox = findViewById(R.id.checkBox)
 
         val client = OkHttpClient()
 
-        val request = Request.Builder().url("https://jsonplaceholder.typicode.com/todos/1").build()
+        val request = Request.Builder()
+            .url("https://api.openweathermap.org/data/2.5/weather?q=tehran&appid=121de68caff6c35cb4ef79c94198d991&lang=fa")
+            .build()
 
-        val callback = object : Callback {
+        client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Log.d("tagh", "onFailure: ${e.localizedMessage}")
+                e.printStackTrace()
+                Log.d("tagx", "onFailure:failed")
             }
 
             override fun onResponse(call: Call, response: Response) {
-//                Log.d("tagh", "onResponse: ${response.body?.string()}")
-
                 val rawResponse = response.body!!.string()
 
                 val jsonObject = JSONObject(rawResponse)
 
-
-                val myTodo = Todo(
-                    userId = jsonObject.getInt("userId"),
-                    id = jsonObject.getInt("id"),
-                    title = jsonObject.getString("title"),
-                    completed = jsonObject.getBoolean("completed")
-                )
-
+                runOnUiThread {
+                    showContent(jsonObject.getString("name"))
+                }
             }
-        }
-
-        client.newCall(request).enqueue(callback)
-
+        })
     }
 
+
+    fun showContent(cityName: String) {
+        binding.cityName.text = cityName
+    }
 
 
 }
