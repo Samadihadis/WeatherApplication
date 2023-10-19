@@ -39,16 +39,21 @@ class MainActivity : AppCompatActivity() {
 
                 val jsonObject = JSONObject(rawResponse)
 
+                val weatherArray = jsonObject.getJSONArray("weather")
+                val weatherObject = weatherArray.getJSONObject(0)
+
+
                 runOnUiThread {
-                    showContent(jsonObject.getString("name"))
+                    showContent(jsonObject.getString("name"), weatherObject.getString("description"))
                 }
             }
         })
     }
 
 
-    fun showContent(cityName: String) {
+    fun showContent(cityName: String , weatherDescription : String) {
        binding.cityName.text = cityName
+        binding.weatherDescription.text = weatherDescription
     }
 
 
