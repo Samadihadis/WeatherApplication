@@ -3,10 +3,7 @@ package com.samadihadis.weatherapplication
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.ActionMenuView
-import android.widget.CheckBox
 import android.widget.Toast
-import androidx.appcompat.widget.AppCompatCheckBox
 import com.samadihadis.weatherapplication.databinding.ActivityMainBinding
 import okhttp3.Call
 import okhttp3.Callback
@@ -17,11 +14,11 @@ import org.json.JSONObject
 import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
-    lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = ActivityMainBinding.inflate(layoutInflater)
+        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
 
@@ -51,7 +48,7 @@ class MainActivity : AppCompatActivity() {
 
 
     fun showContent(cityName: String) {
-        binding.cityName.text = cityName
+       binding.cityName.text = cityName
     }
 
 
