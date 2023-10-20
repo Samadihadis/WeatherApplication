@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         val client = OkHttpClient()
 
         val request = Request.Builder()
-            .url("https://api.openweathermap.org/data/2.5/weather?q=tehran&appid=121de68caff6c35cb4ef79c94198d991&lang=fa")
+            .url("https://api.openweathermap.org/data/2.5/weather?q=tehran&appid=121de68caff6c35cb4ef79c94198d991&lang=fa&units=metric")
             .build()
 
         client.newCall(request).enqueue(object : Callback {
@@ -45,11 +45,18 @@ class MainActivity : AppCompatActivity() {
                 val weatherArray = jsonObject.getJSONArray("weather")
                 val weatherObject = weatherArray.getJSONObject(0)
                 val iconId = weatherObject.getString("icon")
-                val imageUrl = "https://openweathermap.org/img/wn/${iconId}10d@2x.png"
+                val imageUrl = "https://openweathermap.org/img/wn/${iconId}@2x.png"
 
 
                 val sunrise = jsonObject.getJSONObject("sys").getInt("sunrise")
                 val sunset = jsonObject.getJSONObject("sys").getInt("sunset")
+
+                val temp = jsonObject.getJSONObject("main").getDouble("temp")
+                val feelsLike = jsonObject.getJSONObject("main").getDouble("feels_like")
+                val tempMin = jsonObject.getJSONObject("main").getDouble("temp_min")
+                val tempMax = jsonObject.getJSONObject("main").getDouble("temp_max")
+                val pressure = jsonObject.getJSONObject("main").getInt("pressure")
+                val humidity = jsonObject.getJSONObject("main").getInt("humidity")
 
 
                 runOnUiThread {
@@ -58,7 +65,13 @@ class MainActivity : AppCompatActivity() {
                         weatherObject.getString("description"),
                         imageUrl,
                         sunrise,
-                        sunset
+                        sunset,
+                        temp,
+                        feelsLike,
+                        tempMin,
+                        tempMax,
+                        pressure,
+                        humidity
                     )
                 }
             }
@@ -71,12 +84,24 @@ class MainActivity : AppCompatActivity() {
         weatherDescription: String,
         imageUrl: String,
         sunrise: Int,
-        sunset: Int
+        sunset: Int,
+        temp: Double,
+        feelsLike : Double,
+        tempMin : Double,
+        tempMax : Double,
+        pressure : Int,
+        humidity : Int
     ) {
         binding.cityName.text = cityName
         binding.weatherDescription.text = weatherDescription
-        binding.sunrise.text = getTimeFromUnixTime(sunrise)
-        binding.sunset.text = getTimeFromUnixTime(sunset)
+        binding.sunrise.text = "طلوع آفتاب: " + getTimeFromUnixTime(sunrise)
+        binding.sunset.text =  "غروب آفتاب: "+getTimeFromUnixTime(sunset)
+        binding.textViewTemp.text = "دما : $temp"
+        binding.textViewFeelsLike.text = "دمای احساس شده : $feelsLike"
+        binding.textViewTempMin.text = "حداقل دما : $tempMin"
+        binding.textViewTempMax.text = "حداکثر دما : $tempMax"
+        binding.textViewPressure.text = "فشار هوا : $pressure"
+        binding.textViewHumidity.text = "رطوبت هوا : $humidity"
         Glide.with(this@MainActivity).load(imageUrl).into(binding.imageViewWeather)
     }
 
