@@ -12,6 +12,9 @@ import okhttp3.Request
 import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.logging.SimpleFormatter
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -45,11 +48,17 @@ class MainActivity : AppCompatActivity() {
                 val imageUrl = "https://openweathermap.org/img/wn/${iconId}10d@2x.png"
 
 
+                val sunrise = jsonObject.getJSONObject("sys").getInt("sunrise")
+                val sunset = jsonObject.getJSONObject("sys").getInt("sunset")
+
+
                 runOnUiThread {
                     showContent(
                         jsonObject.getString("name"),
                         weatherObject.getString("description"),
-                        imageUrl
+                        imageUrl,
+                        sunrise,
+                        sunset
                     )
                 }
             }
@@ -57,11 +66,27 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun showContent(cityName: String, weatherDescription: String, imageUrl: String) {
-       binding.cityName.text = cityName
+    fun showContent(
+        cityName: String,
+        weatherDescription: String,
+        imageUrl: String,
+        sunrise: Int,
+        sunset: Int
+    ) {
+        binding.cityName.text = cityName
         binding.weatherDescription.text = weatherDescription
+        binding.sunrise.text = getTimeFromUnixTime(sunrise)
+        binding.sunset.text = getTimeFromUnixTime(sunset)
         Glide.with(this@MainActivity).load(imageUrl).into(binding.imageViewWeather)
     }
 
+
+    fun getTimeFromUnixTime(unixTime: Int): String {
+        val time = unixTime * 1000.toLong()
+        val date = Date(time)
+        val formatter = SimpleDateFormat("HH:mm a")
+        return formatter.format(date)
+
+    }
 
 }
