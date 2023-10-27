@@ -1,9 +1,11 @@
 package com.samadihadis.weatherapplication
 
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import com.bumptech.glide.Glide
 import com.samadihadis.weatherapplication.databinding.ActivityMainBinding
 import io.github.inflationx.viewpump.ViewPumpContextWrapper
@@ -29,106 +31,127 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         getData()
+    }
+
+    private fun showContent(
+        cityName: String,
+        weatherDescription: String,
+        imageUrl: String,
+        sunrise: Int,
+        sunset: Int,
+        temp: Double,
+        feelsLike: Double,
+        tempMin: Double,
+        tempMax: Double,
+        pressure: Int,
+        humidity: Int
+    ) {
+        binding.cityImageView.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.INVISIBLE
+        binding.cityName.text = cityName
+        binding.weatherDescription.text = weatherDescription
+        binding.sunrise.text = "طلوع: " + getTimeFromUnixTime(sunrise)
+        binding.sunset.text = "غروب: " + getTimeFromUnixTime(sunset)
+        binding.textViewTemp.text = "دما : $temp"
+        binding.textViewFeelsLike.text = "دمای احساس شده : $feelsLike"
+        binding.textViewTempMin.text = "حداقل دما : $tempMin"
+        binding.textViewTempMax.text = "حداکثر دما : $tempMax"
+        binding.textViewPressure.text = "فشار هوا : $pressure"
+        binding.textViewHumidity.text = "رطوبت هوا : $humidity"
+        Glide.with(this@MainActivity).load(imageUrl).into(binding.imageViewWeather)
+    }
+
+
+    private fun getTimeFromUnixTime(unixTime: Int): String {
+        val time = unixTime * 1000.toLong()
+        val date = Date(time)
+        val formatter = SimpleDateFormat("HH:mm a")
+        return formatter.format(date)
 
     }
 
-        fun showContent(
-            cityName: String,
-            weatherDescription: String,
-            imageUrl: String,
-            sunrise: Int,
-            sunset: Int,
-            temp: Double,
-            feelsLike: Double,
-            tempMin: Double,
-            tempMax: Double,
-            pressure: Int,
-            humidity: Int
-        ) {
-            binding.cityName.text = cityName
-            binding.weatherDescription.text = weatherDescription
-            binding.sunrise.text = "طلوع آفتاب: " + getTimeFromUnixTime(sunrise)
-            binding.sunset.text = "غروب آفتاب: " + getTimeFromUnixTime(sunset)
-            binding.textViewTemp.text = "دما : $temp"
-            binding.textViewFeelsLike.text = "دمای احساس شده : $feelsLike"
-            binding.textViewTempMin.text = "حداقل دما : $tempMin"
-            binding.textViewTempMax.text = "حداکثر دما : $tempMax"
-            binding.textViewPressure.text = "فشار هوا : $pressure"
-            binding.textViewHumidity.text = "رطوبت هوا : $humidity"
-            Glide.with(this@MainActivity).load(imageUrl).into(binding.imageViewWeather)
-        }
+    private fun getData() {
 
+        val client = OkHttpClient()
 
-        fun getTimeFromUnixTime(unixTime: Int): String {
-            val time = unixTime * 1000.toLong()
-            val date = Date(time)
-            val formatter = SimpleDateFormat("HH:mm a")
-            return formatter.format(date)
-
-        }
-
-        fun getData() {
-
-            val client = OkHttpClient()
-
-            val request = Request.Builder()
-                .url("https://api.openweathermap.org/data/2.5/weather?q=tehran&appid=121de68caff6c35cb4ef79c94198d991&lang=fa&units=metric")
-                .build()
-            client.newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    e.printStackTrace()
-                    Log.d("tagx", "onFailure:failed")
-                }
-
-                override fun onResponse(call: Call, response: Response) {
-                    val rawContent = response.body!!.string()
-                    getDataAndShowThem(rawContent)
-                }
-            })
-        }
-
-
-        fun getDataAndShowThem(rawData: String) {
-            val jsonObject = JSONObject(rawData)
-
-            val weatherArray = jsonObject.getJSONArray("weather")
-            val weatherObject = weatherArray.getJSONObject(0)
-            val iconId = weatherObject.getString("icon")
-            val imageUrl = "https://openweathermap.org/img/wn/${iconId}@2x.png"
-
-
-            val sunrise = jsonObject.getJSONObject("sys").getInt("sunrise")
-            val sunset = jsonObject.getJSONObject("sys").getInt("sunset")
-
-            val temp = jsonObject.getJSONObject("main").getDouble("temp")
-            val feelsLike = jsonObject.getJSONObject("main").getDouble("feels_like")
-            val tempMin = jsonObject.getJSONObject("main").getDouble("temp_min")
-            val tempMax = jsonObject.getJSONObject("main").getDouble("temp_max")
-            val pressure = jsonObject.getJSONObject("main").getInt("pressure")
-            val humidity = jsonObject.getJSONObject("main").getInt("humidity")
-
-
-            runOnUiThread {
-                showContent(
-                    jsonObject.getString("name"),
-                    weatherObject.getString("description"),
-                    imageUrl,
-                    sunrise,
-                    sunset,
-                    temp,
-                    feelsLike,
-                    tempMin,
-                    tempMax,
-                    pressure,
-                    humidity
-                )
+        val request = Request.Builder()
+            .url("https://api.openweathermap.org/data/2.5/weather?q=tehran&appid=121de68caff6c35cb4ef79c94198d991&lang=fa&units=metric")
+            .build()
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+                Log.d("tagx", "onFailure:failed")
             }
 
+            override fun onResponse(call: Call, response: Response) {
+                val rawContent = response.body!!.string()
+                getDataAndShowThem(rawContent)
+
+            }
+        })
+    }
+
+
+    fun getDataAndShowThem(rawData: String) {
+        val jsonObject = JSONObject(rawData)
+
+        val weatherArray = jsonObject.getJSONArray("weather")
+        val weatherObject = weatherArray.getJSONObject(0)
+        val iconId = weatherObject.getString("icon")
+        val imageUrl = "https://openweathermap.org/img/wn/${iconId}@2x.png"
+
+
+        val sunrise = jsonObject.getJSONObject("sys").getInt("sunrise")
+        val sunset = jsonObject.getJSONObject("sys").getInt("sunset")
+
+        val temp = jsonObject.getJSONObject("main").getDouble("temp")
+        val feelsLike = jsonObject.getJSONObject("main").getDouble("feels_like")
+        val tempMin = jsonObject.getJSONObject("main").getDouble("temp_min")
+        val tempMax = jsonObject.getJSONObject("main").getDouble("temp_max")
+        val pressure = jsonObject.getJSONObject("main").getInt("pressure")
+        val humidity = jsonObject.getJSONObject("main").getInt("humidity")
+
+
+        runOnUiThread {
+            showContent(
+                jsonObject.getString("name"),
+                weatherObject.getString("description"),
+                imageUrl,
+                sunrise,
+                sunset,
+                temp,
+                feelsLike,
+                tempMin,
+                tempMax,
+                pressure,
+                humidity
+            )
         }
 
     }
+
+    fun reloadData(view: View) {
+        binding.cityImageView.visibility = View.INVISIBLE
+        binding.progressBar.visibility = View.VISIBLE
+
+        binding.cityName.text = "شهر"
+        binding.weatherDescription.text = "آب و هوا"
+        binding.sunrise.text = "طلوع: --"
+        binding.sunset.text = "غروب: --"
+        binding.textViewTemp.text = "دما: --"
+        binding.textViewFeelsLike.text = "دمای احساس شده: --"
+        binding.textViewTempMin.text = "حداقل دما: --"
+        binding.textViewTempMax.text = "حداکثر دما: --"
+        binding.textViewPressure.text = "فشار هوا: --"
+        binding.textViewHumidity.text = "رطوبت هوا: --"
+        Glide.with(this@MainActivity).load(R.drawable.ic_refresh).into(binding.imageViewWeather)
+
+
+        getData()
+    }
+
+}
 
 
 
