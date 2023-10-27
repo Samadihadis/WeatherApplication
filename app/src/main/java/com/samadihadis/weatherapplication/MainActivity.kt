@@ -14,10 +14,12 @@ import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.internal.toLongOrDefault
 import org.json.JSONObject
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 import java.util.logging.SimpleFormatter
 
 class MainActivity : AppCompatActivity() {
@@ -47,18 +49,21 @@ class MainActivity : AppCompatActivity() {
         pressure: Int,
         humidity: Int
     ) {
-        binding.cityImageView.visibility = View.VISIBLE
-        binding.progressBar.visibility = View.INVISIBLE
-        binding.cityName.text = cityName
-        binding.weatherDescription.text = weatherDescription
-        binding.sunrise.text = "طلوع: " + getTimeFromUnixTime(sunrise)
-        binding.sunset.text = "غروب: " + getTimeFromUnixTime(sunset)
-        binding.textViewTemp.text = "دما : $temp"
-        binding.textViewFeelsLike.text = "دمای احساس شده : $feelsLike"
-        binding.textViewTempMin.text = "حداقل دما : $tempMin"
-        binding.textViewTempMax.text = "حداکثر دما : $tempMax"
-        binding.textViewPressure.text = "فشار هوا : $pressure"
-        binding.textViewHumidity.text = "رطوبت هوا : $humidity"
+
+        with(binding){
+            cityImageView.visibility = View.VISIBLE
+            progressBar.visibility = View.INVISIBLE
+            cityNameTextView.text = cityName
+            weatherDescriptionTextView.text = weatherDescription
+            sunriseTextView.text = "طلوع: " + getTimeFromUnixTime(sunrise)
+            sunsetTextView.text = "غروب: " + getTimeFromUnixTime(sunset)
+            textViewTemp.text = "دما : $temp"
+            textViewFeelsLike.text = "دمای احساس شده : $feelsLike"
+            textViewTempMin.text = "حداقل دما : $tempMin"
+            textViewTempMax.text = "حداکثر دما : $tempMax"
+            textViewPressure.text = "فشار هوا : $pressure"
+            textViewHumidity.text = "رطوبت هوا : $humidity"
+        }
         Glide.with(this@MainActivity).load(imageUrl).into(binding.imageViewWeather)
     }
 
@@ -66,9 +71,8 @@ class MainActivity : AppCompatActivity() {
     private fun getTimeFromUnixTime(unixTime: Int): String {
         val time = unixTime * 1000.toLong()
         val date = Date(time)
-        val formatter = SimpleDateFormat("HH:mm a")
+        val formatter = SimpleDateFormat("HH:mm")
         return formatter.format(date)
-
     }
 
     private fun getData() {
@@ -132,24 +136,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun reloadData(view: View) {
-        binding.cityImageView.visibility = View.INVISIBLE
-        binding.progressBar.visibility = View.VISIBLE
 
-        binding.cityName.text = "شهر"
-        binding.weatherDescription.text = "آب و هوا"
-        binding.sunrise.text = "طلوع: --"
-        binding.sunset.text = "غروب: --"
-        binding.textViewTemp.text = "دما: --"
-        binding.textViewFeelsLike.text = "دمای احساس شده: --"
-        binding.textViewTempMin.text = "حداقل دما: --"
-        binding.textViewTempMax.text = "حداکثر دما: --"
-        binding.textViewPressure.text = "فشار هوا: --"
-        binding.textViewHumidity.text = "رطوبت هوا: --"
+        with(binding){
+            cityImageView.visibility = View.INVISIBLE
+            progressBar.visibility = View.VISIBLE
+            cityNameTextView.text = "شهر"
+            weatherDescriptionTextView.text = "آب و هوا"
+            sunriseTextView.text = "طلوع: --"
+            sunsetTextView.text = "غروب: --"
+            textViewTemp.text = "دما: --"
+            textViewFeelsLike.text = "دمای احساس شده: --"
+            textViewTempMin.text = "حداقل دما: --"
+            textViewTempMax.text = "حداکثر دما: --"
+            textViewPressure.text = "فشار هوا: --"
+            textViewHumidity.text = "رطوبت هوا: --"
+        }
+
         Glide.with(this@MainActivity).load(R.drawable.ic_refresh).into(binding.imageViewWeather)
 
 
         getData()
     }
+
+
 
 }
 
